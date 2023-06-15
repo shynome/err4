@@ -2,7 +2,7 @@
 
 for this proposal [proposal: Go 2: Error-Handling Paradigm with ?err Grammar Sugar](https://github.com/golang/go/issues/60779)
 
-use `var qTerr error` instedof `var err error`, `qTerr` = `?err` -> `qT` = `?`
+ps: `qTerr` = `?err` -> `qT` = `?`
 
 ### how to use
 
