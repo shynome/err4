@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/shynome/err4/pkg/transpile"
 )
@@ -14,16 +13,29 @@ var args struct {
 	input string
 	out   string
 	err4  bool
+
+	watch bool
+	root  string
 }
 
 func init() {
 	flag.StringVar(&args.input, "f", "", "the input file path")
 	flag.StringVar(&args.out, "o", "", "the out file path")
 	flag.BoolVar(&args.err4, "err4", false, "transform weather the content include err4 build tag")
+
+	flag.BoolVar(&args.watch, "w", false, "watch")
+	flag.StringVar(&args.root, "root", "", "watch root")
 }
 
 func main() {
 	flag.Parse()
+
+	if args.watch {
+		if err := watch(args.root); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 
 	if args.input == "" {
 		log.Fatal("input file is required")
@@ -33,7 +45,7 @@ func main() {
 		if args.input == "-" {
 			args.out = "-"
 		} else {
-			args.out = strings.TrimSuffix(args.input, ".go") + "_err4.go"
+			args.out = err4path(args.input)
 		}
 	}
 
