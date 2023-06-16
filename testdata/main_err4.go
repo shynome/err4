@@ -21,10 +21,7 @@ func main() {
 
 	var e1, e2 error
 	_, _, _ = err4.Check2(7, e1, e2)(nil, &qTerr, &qTerr2)
-	if qTerr != nil {
-		return
-	}
-	if qTerr2 != nil {
+	if qTerr != nil || qTerr2 != nil {
 		return
 	}
 }

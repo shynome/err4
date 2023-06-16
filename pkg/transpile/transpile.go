@@ -1,8 +1,8 @@
 package transpile
 
 import (
+	"fmt"
 	"go/ast"
-	"go/token"
 	"strconv"
 	"strings"
 
@@ -45,25 +45,25 @@ func ChangeErr4AssignStmt(x *ast.AssignStmt, c *astutil.Cursor) (changed bool) {
 	x.Rhs = []ast.Expr{call}
 	// add return stmt
 	keys := map[string]int{}
-	for i := len(errs) - 1; i >= 0; i-- {
-		name := errs[i]
+	vars := []string{}
+	for _, name := range errs {
 		if keys[name] != 0 {
 			continue
 		}
-		ifstmt := &ast.IfStmt{
-			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(name),
-				Op: token.NEQ,
-				Y:  ast.NewIdent("nil"),
-			},
-			Body: &ast.BlockStmt{
-				List: []ast.Stmt{
-					&ast.ReturnStmt{},
-				},
-			},
-		}
-		c.InsertAfter(ifstmt)
+		keys[name] = 1
+
+		vars = append(vars, fmt.Sprintf("%s != nil", name))
 	}
+	cond := ast.NewIdent(strings.Join(vars, " || "))
+	checkReturnStmt := &ast.IfStmt{
+		Cond: cond,
+		Body: &ast.BlockStmt{
+			List: []ast.Stmt{
+				&ast.ReturnStmt{},
+			},
+		},
+	}
+	c.InsertAfter(checkReturnStmt)
 	return
 }
 
