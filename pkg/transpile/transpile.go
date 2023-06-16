@@ -75,17 +75,27 @@ func SkipChangeErr4AssignStmt(v ast.Expr) *ast.Ident {
 	if !strings.HasPrefix(vv.Name, "qT") {
 		return nil
 	}
-	src, ok := vv.Obj.Decl.(*ast.ValueSpec)
-	if !ok {
+	switch src := vv.Obj.Decl.(type) {
+	case *ast.ValueSpec:
+		t, ok := src.Type.(*ast.Ident)
+		if !ok {
+			return nil
+		}
+		if t.Name != "error" {
+			return nil
+		}
+	case *ast.Field:
+		t, ok := src.Type.(*ast.Ident)
+		if !ok {
+			return nil
+		}
+		if t.Name != "error" {
+			return nil
+		}
+	default:
 		return nil
 	}
-	t, ok := src.Type.(*ast.Ident)
-	if !ok {
-		return nil
-	}
-	if t.Name != "error" {
-		return nil
-	}
+
 	return vv
 }
 

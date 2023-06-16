@@ -28,3 +28,11 @@ func main() {
 		return
 	}
 }
+
+func fn() (qTry error) {
+	_ = err4.Check(errors.New("e"))(&qTry)
+	if qTry != nil {
+		return
+	}
+	return
+}
