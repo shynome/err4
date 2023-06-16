@@ -9,7 +9,7 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func ChangeErr4AssignStmt(x *ast.AssignStmt, c *astutil.Cursor) {
+func ChangeErr4AssignStmt(x *ast.AssignStmt, c *astutil.Cursor) (changed bool) {
 	errsArgs := make([]ast.Expr, len(x.Lhs))
 	errs := []string{}
 	for i, v := range x.Lhs {
@@ -25,6 +25,7 @@ func ChangeErr4AssignStmt(x *ast.AssignStmt, c *astutil.Cursor) {
 	if len(errs) == 0 {
 		return
 	}
+	changed = true
 	check := "Check"
 	if n := len(x.Lhs) - 1; n > 0 {
 		check = check + strconv.Itoa(n)
