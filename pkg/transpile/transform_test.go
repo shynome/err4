@@ -1,7 +1,6 @@
-package main
+package transpile
 
 import (
-	"bytes"
 	"io"
 	"os"
 	"testing"
@@ -11,8 +10,7 @@ import (
 )
 
 func TestGen(t *testing.T) {
-	var output bytes.Buffer
-	try.To(gen("../../testdata/main.go", nil, &output))
+	output, _ := try.To2(Transform("../../testdata/main.go", nil))
 	f := try.To1(os.Open("../../testdata/main_err4.go"))
 	b := try.To1(io.ReadAll(f))
 	assert.Equal(output.String(), string(b))
