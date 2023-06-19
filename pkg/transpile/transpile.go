@@ -75,6 +75,9 @@ func SkipChangeErr4AssignStmt(v ast.Expr) *ast.Ident {
 	if !strings.HasPrefix(vv.Name, "qT") {
 		return nil
 	}
+	if vv.Obj == nil || vv.Obj.Decl == nil {
+		return nil
+	}
 	switch src := vv.Obj.Decl.(type) {
 	case *ast.ValueSpec:
 		t, ok := src.Type.(*ast.Ident)
