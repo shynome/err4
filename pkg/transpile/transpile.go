@@ -105,8 +105,8 @@ func SkipChangeErr4AssignStmt(v ast.Expr) *ast.Ident {
 func RepalceErr4BuildTag(x *ast.File) bool {
 	for _, cc := range x.Comments {
 		for _, c := range cc.List {
-			if strings.HasPrefix(c.Text, "//go:build ") {
-				c.Text = strings.ReplaceAll(c.Text, " err4", " !err4")
+			if strings.HasPrefix(c.Text, "//go:build err4") {
+				c.Text = strings.Replace(c.Text, "//go:build err4", "//go:build !err4", 1)
 				return true
 			}
 		}
