@@ -9,7 +9,7 @@ for this proposal [proposal: Go 2: Error-Handling Paradigm with !err Grammar Sug
 #### 安装
 
 ```
-go install github.com/shynome/err4@v0.0.5/cmd/err4gen
+go install github.com/shynome/err4/cmd/err4gen@v0.0.5
 ```
 
 #### 创建文件
