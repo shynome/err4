@@ -3,46 +3,24 @@ package transpile
 import (
 	"fmt"
 	"go/ast"
-	"strconv"
 	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
 
 func ChangeErr4AssignStmt(x *ast.AssignStmt, c *astutil.Cursor) (changed bool) {
-	errsArgs := make([]ast.Expr, len(x.Lhs))
 	errs := []string{}
-	for i, v := range x.Lhs {
+	for _, v := range x.Lhs {
 		t := SkipChangeErr4AssignStmt(v)
 		if t == nil {
-			errsArgs[i] = ast.NewIdent("nil")
 			continue
 		}
-		errsArgs[i] = ast.NewIdent("&" + t.Name)
 		errs = append(errs, t.Name)
-		t.Name = "_"
 	}
 	if len(errs) == 0 {
 		return
 	}
 	changed = true
-	check := "Check"
-	if n := len(x.Lhs) - 1; n > 0 {
-		check = check + strconv.Itoa(n)
-	}
-	fn := &ast.SelectorExpr{
-		X:   ast.NewIdent("err4"),
-		Sel: ast.NewIdent(check),
-	}
-	fn2 := &ast.CallExpr{
-		Fun:  fn,
-		Args: x.Rhs,
-	}
-	call := &ast.CallExpr{
-		Fun:  fn2,
-		Args: errsArgs,
-	}
-	x.Rhs = []ast.Expr{call}
 	// add return stmt
 	keys := map[string]int{}
 	vars := []string{}
@@ -72,7 +50,7 @@ func SkipChangeErr4AssignStmt(v ast.Expr) *ast.Ident {
 	if !ok {
 		return nil
 	}
-	if !strings.HasPrefix(vv.Name, "qT") {
+	if !strings.HasPrefix(vv.Name, "i") {
 		return nil
 	}
 	if vv.Obj == nil || vv.Obj.Decl == nil {
@@ -105,8 +83,8 @@ func SkipChangeErr4AssignStmt(v ast.Expr) *ast.Ident {
 func RepalceErr4BuildTag(x *ast.File) bool {
 	for _, cc := range x.Comments {
 		for _, c := range cc.List {
-			if strings.HasPrefix(c.Text, "//go:build err4") {
-				c.Text = strings.Replace(c.Text, "//go:build err4", "//go:build !err4", 1)
+			if strings.HasPrefix(c.Text, "//go:build ierr") {
+				c.Text = strings.Replace(c.Text, "//go:build ierr", "//go:build !ierr", 1)
 				return true
 			}
 		}

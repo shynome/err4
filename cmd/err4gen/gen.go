@@ -1,13 +1,17 @@
 package main
 
 import (
+	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/shynome/err4/pkg/transpile"
+	"golang.org/x/sync/errgroup"
 )
 
 var args struct {
@@ -22,52 +26,95 @@ var args struct {
 func init() {
 	flag.StringVar(&args.input, "f", "", "the input file path")
 	flag.StringVar(&args.out, "o", "", "the out file path")
-	flag.BoolVar(&args.err4, "err4", false, "transform weather the content include err4 build tag")
+	flag.BoolVar(&args.err4, "err4", false, "transform weather the content include ierr build tag")
 }
 
 func main() {
 	flag.Parse()
 
-	if args.input == "" {
-		log.Fatal("input file is required")
+	if args.input == "" && len(os.Args) > 1 {
+		args.input = os.Args[1]
 	}
 
-	if args.out == "" {
-		if args.input == "-" {
-			args.out = "-"
+	if finfo, err := os.Stat(args.input); err != nil {
+		log.Fatalln(err)
+	} else if !finfo.IsDir() {
+		if err := gen(args.input, args.out); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
+	entries, err := os.ReadDir(args.input)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	eg := new(errgroup.Group)
+	for _, _f := range entries {
+		f := _f
+		eg.Go(func() error {
+			input := f.Name()
+			if f.IsDir() ||
+				strings.HasSuffix(input, "_ierr.go") {
+				return nil
+			}
+			input = filepath.Join(args.input, input)
+			err := gen(input, "")
+			if errors.Is(err, ErrNotErr4GoFile) {
+				return nil
+			}
+			return err
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		log.Fatalln(err)
+	}
+
+}
+
+func gen(input, out string) error {
+	if input == "" {
+		return fmt.Errorf("input file is required")
+	}
+
+	if out == "" {
+		if input == "-" {
+			out = "-"
 		} else {
-			args.out = err4path(args.input)
+			out = err4Path(input)
 		}
 	}
 
 	var src io.Reader = nil
-	if args.input == "-" {
+	if input == "-" {
 		src = os.Stdin
 	}
 
-	output, err4file, err := transpile.Transform(args.input, src)
+	output, err4file, err := transpile.Transform(input, src)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if !args.err4 {
 		args.err4 = err4file
 	}
 	if !args.err4 {
-		log.Println("file content don't include err4 build tag")
-		return
+		return ErrNotErr4GoFile
 	}
 
-	if args.out == "-" {
+	if out == "-" {
 		io.Copy(os.Stdout, &output)
-		return
+		return nil
 	}
 
-	if err := os.WriteFile(args.out, output.Bytes(), os.ModePerm); err != nil {
-		log.Fatal(err)
+	if err := os.WriteFile(out, output.Bytes(), os.ModePerm); err != nil {
+		return err
 	}
+	return nil
 }
 
-func err4path(f string) string {
-	return strings.TrimSuffix(f, ".go") + "_err4.go"
+var ErrNotErr4GoFile = fmt.Errorf("file content don't include ierr build tag")
+
+func err4Path(f string) string {
+	return strings.TrimSuffix(f, ".go") + "_ierr.go"
 }
