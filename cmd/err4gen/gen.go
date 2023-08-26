@@ -55,7 +55,8 @@ func main() {
 		eg.Go(func() error {
 			input := f.Name()
 			if f.IsDir() ||
-				strings.HasSuffix(input, "_ierr.go") {
+				strings.HasSuffix(input, "_ierr.go") ||
+				strings.HasSuffix(input, "_ierr_test.go") {
 				return nil
 			}
 			input = filepath.Join(args.input, input)
@@ -116,5 +117,8 @@ func gen(input, out string) error {
 var ErrNotErr4GoFile = fmt.Errorf("file content don't include ierr build tag")
 
 func err4Path(f string) string {
+	if strings.HasSuffix(f, "_test.go") {
+		return strings.TrimSuffix(f, "_test.go") + "_ierr_test.go"
+	}
 	return strings.TrimSuffix(f, ".go") + "_ierr.go"
 }
