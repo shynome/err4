@@ -96,10 +96,7 @@ func gen(input, out string) error {
 		return err
 	}
 
-	if !args.err4 {
-		args.err4 = err4file
-	}
-	if !args.err4 {
+	if !(args.err4 || err4file) {
 		return ErrNotErr4GoFile
 	}
 
