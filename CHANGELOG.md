@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6] - 2023-08-27
+
+### Fix
+
+- support `*_test.go` file
+- fix: wrong change `args.err4` var
+
 ## [0.0.5] - 2023-08-24
 
 ### Change
