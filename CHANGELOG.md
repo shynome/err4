@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.7] - 2023-08-27
+
+### Fix
+
+-fix: skip ierr in if stat
+
 ## [0.0.6] - 2023-08-27
 
 ### Fix
