@@ -9,6 +9,9 @@ import (
 )
 
 func ChangeErr4AssignStmt(x *ast.AssignStmt, c *astutil.Cursor) (changed bool) {
+	if _, ok := c.Parent().(*ast.BlockStmt); !ok {
+		return
+	}
 	errs := []string{}
 	for _, v := range x.Lhs {
 		t := SkipChangeErr4AssignStmt(v)

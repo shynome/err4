@@ -26,3 +26,10 @@ func fn2() (ierr error) {
 	ierr = errors.New("e")
 	return
 }
+
+func fn3() (ierr error) {
+	if ierr = errors.New(""); ierr != nil {
+		return
+	}
+	return
+}

@@ -40,3 +40,10 @@ func fn2() (ierr error) {
 	}
 	return
 }
+
+func fn3() (ierr error) {
+	if ierr = errors.New(""); ierr != nil {
+		return
+	}
+	return
+}
