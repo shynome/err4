@@ -52,6 +52,9 @@ func main() {
 	eg := new(errgroup.Group)
 	for _, _f := range entries {
 		f := _f
+		if n := f.Name(); !strings.HasSuffix(n, ".go") {
+			continue
+		}
 		eg.Go(func() error {
 			input := f.Name()
 			if f.IsDir() ||
